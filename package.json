@@ -1,0 +1,22 @@
+{
+  "name": "nodejs_login_register",
+  "version": "1.0.0",
+  "description": "A login and register app built in Node.js and Express",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delivey/nodejs_login_register.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/delivey/nodejs_login_register/issues"
+  },
+  "homepage": "https://github.com/delivey/nodejs_login_register#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
