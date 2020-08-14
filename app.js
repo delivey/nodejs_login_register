@@ -20,6 +20,9 @@ app.use(express.urlencoded({
   extended: true
 }))
 
+// Template engine
+app.engine('html', require('ejs').renderFile);
+
 // GET Routes
 
 app.get('/', (req, res) => {
@@ -28,13 +31,38 @@ app.get('/', (req, res) => {
 })
 
 app.get('/login', (req, res) => {
-  var index_path = __dirname + '/templates/' + 'login.html';
-  res.sendFile(index_path);
+  var login_path = __dirname + '/templates/' + 'login.html';
+  res.sendFile(login_path);
 })
 
 app.get('/register', (req, res) => {
-  var index_path = __dirname + '/templates/' + 'register.html';
-  res.sendFile(index_path);
+  var register_path = __dirname + '/templates/' + 'register.html';
+  res.sendFile(register_path);
+})
+
+app.get('/profile', (req, res) => {
+  var profile_path = __dirname + '/templates/' + 'profile.html';
+
+  let sess = req.session;
+
+  const id = sess.user_id;
+
+  // console.log("User id: " + id);
+
+  let db = new sqlite3.Database('./database.db', (err) => {
+    if (err) {
+      console.error(err.message);
+    }
+    let usernameSql = "SELECT username FROM users WHERE id=(?)";
+      db.get(usernameSql, [id], (err, row) => {
+        if (err) {
+          return console.error(err.message);
+        };
+        // console.log("Username: " + row.username);
+        var username = row.username;
+        res.render(profile_path, {username:username});
+  })
+  })
 })
 
 // POST Routes
@@ -71,7 +99,7 @@ app.post('/register', (req, res) => {
         };
         sess.user_id = row.id;
         // console.log("User session id: " + sess.user_id);
-        res.redirect("/");
+        res.redirect("/profile");
     })
   })
 })
@@ -88,17 +116,6 @@ app.post('/login', (req, res) => {
 
   let sess = req.session;
 
-  /*
-  function fetchone(sql, property) {
-    db.get(sql, [property], (err, row) => {
-      if (err) {
-        return "Unsuccessful hash selection!";
-      };
-      return row.value;
-    })
-  }
-  */
-
   let db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
       console.log("Unsuccessful database connection!");
@@ -112,7 +129,7 @@ app.post('/login', (req, res) => {
       };
       id=row.id;
       // console.log("ID: " + id);
-          // Selects the hash for the user id
+      // Selects the hash for the user id
       let hashSql = "SELECT hash FROM users WHERE username=(?)"
       db.get(hashSql, [username], (err, row) => {
         if (err) {
@@ -120,12 +137,12 @@ app.post('/login', (req, res) => {
         };
         hash = row.hash;
         // console.log("Password hash: " + hash)
-                // Compares the password hash to the one in the database
+        // Compares the password hash to the one in the database
         bcrypt.compare(password, hash, function(err, result) {
           if (result == true) {
             sess.user_id = id;
             // console.log("Id in session: " + sess.user_id);
-            res.redirect("/");
+            res.redirect("/profile");
           } else {
             res.redirect("/login");
           }
